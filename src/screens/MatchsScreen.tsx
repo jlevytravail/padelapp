@@ -1,14 +1,21 @@
 import React from 'react';
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { mockMatches } from '../data/mockData';
 import { Match } from '../types';
+import { theme } from '../themes';
+import { 
+  Card, 
+  Typography, 
+  Caption,
+  FAB,
+  Avatar 
+} from '../components/ui';
 
 const MatchsScreen = () => {
   const navigation = useNavigation();
@@ -39,40 +46,85 @@ const MatchsScreen = () => {
   };
 
   const renderMatch = ({ item }: { item: Match }) => (
-    <TouchableOpacity style={styles.matchCard}>
+    <Card variant="elevated" style={styles.matchCard}>
       <View style={styles.matchHeader}>
-        <Text style={styles.date}>{new Date(item.date).toLocaleDateString('fr-FR')}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+        <View style={styles.matchInfo}>
+          <Typography variant="subtitle1">{new Date(item.date).toLocaleDateString('fr-FR')}</Typography>
+          <Caption>{item.time} • {item.court}</Caption>
+        </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+          <Icon name={getStatusIcon(item.status)} size={12} color={theme.colors.text.inverse} />
+          <Typography variant="caption" color={theme.colors.text.inverse} style={styles.statusText}>
+            {getStatusText(item.status)}
+          </Typography>
         </View>
       </View>
       
-      <View style={styles.matchDetails}>
-        <Text style={styles.court}>{item.court}</Text>
-        
+      <View style={styles.matchContent}>
         <View style={styles.teamsContainer}>
           <View style={styles.team}>
-            <Text style={styles.teamTitle}>Équipe 1</Text>
-            <Text style={styles.playerName}>{item.player1.name}</Text>
-            <Text style={styles.playerName}>{item.player2.name}</Text>
+            <Typography variant="overline" color={theme.colors.primary[500]} style={styles.teamTitle}>
+              Équipe 1
+            </Typography>
+            <View style={styles.playersRow}>
+              <Avatar name={item.player1.name} size="small" />
+              <Avatar name={item.player2.name} size="small" />
+            </View>
+            <Caption style={styles.playerNames}>
+              {item.player1.name.split(' ')[0]} & {item.player2.name.split(' ')[0]}
+            </Caption>
           </View>
           
           <View style={styles.scoreContainer}>
-            <Text style={styles.score}>
-              {item.team1Score} - {item.team2Score}
-            </Text>
+            <Typography variant="scoreLarge" color={getScoreColor(item)}>
+              {item.team1Score}
+            </Typography>
+            <Typography variant="h4" color={theme.colors.neutral[500]}>-</Typography>
+            <Typography variant="scoreLarge" color={getScoreColor(item, false)}>
+              {item.team2Score}
+            </Typography>
+            {item.sets && item.sets.length > 0 && (
+              <Caption style={styles.setsInfo}>
+                {item.sets.length} set{item.sets.length > 1 ? 's' : ''}
+              </Caption>
+            )}
           </View>
           
           <View style={styles.team}>
-            <Text style={styles.teamTitle}>Équipe 2</Text>
-            <Text style={styles.playerName}>{item.player3.name}</Text>
-            <Text style={styles.playerName}>{item.player4.name}</Text>
+            <Typography variant="overline" color={theme.colors.secondary[500]} style={styles.teamTitle}>
+              Équipe 2
+            </Typography>
+            <View style={styles.playersRow}>
+              <Avatar name={item.player3.name} size="small" />
+              <Avatar name={item.player4.name} size="small" />
+            </View>
+            <Caption style={styles.playerNames}>
+              {item.player3.name.split(' ')[0]} & {item.player4.name.split(' ')[0]}
+            </Caption>
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
+
+  const getScoreColor = (match: Match, isTeam1: boolean = true) => {
+    if (match.status !== 'completed') return theme.colors.neutral[500];
+    
+    const isWinning = isTeam1 
+      ? match.team1Score > match.team2Score 
+      : match.team2Score > match.team1Score;
+      
+    return isWinning ? theme.colors.success[500] : theme.colors.error[500];
+  };
+
+  const getStatusIcon = (status: Match['status']) => {
+    switch (status) {
+      case 'completed': return 'checkmark-circle';
+      case 'ongoing': return 'play-circle';
+      case 'scheduled': return 'time';
+      default: return 'ellipse';
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -84,13 +136,11 @@ const MatchsScreen = () => {
         showsVerticalScrollIndicator={false}
       />
       
-      {/* Bouton flottant pour ajouter un match */}
-      <TouchableOpacity 
-        style={styles.fab}
+      <FAB 
         onPress={() => navigation.navigate('AddMatch')}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+        icon={<Icon name="add" size={24} color={theme.colors.text.inverse} />}
+        gradient={theme.colors.gradients.primary}
+      />
     </View>
   );
 };
@@ -98,54 +148,40 @@ const MatchsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background.secondary,
   },
   list: {
-    padding: 16,
+    paddingHorizontal: theme.spacing.layout.screen.horizontal,
+    paddingVertical: theme.spacing.md,
+    paddingBottom: theme.spacing['20'], // Extra space for FAB
   },
   matchCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: theme.spacing.md,
   },
   matchHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
-  date: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  time: {
-    fontSize: 14,
-    color: '#666',
+  matchInfo: {
+    flex: 1,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.spacing.component.radius.full,
   },
   statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  matchDetails: {
-    gap: 12,
-  },
-  court: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+  matchContent: {
+    marginTop: theme.spacing.sm,
   },
   teamsContainer: {
     flexDirection: 'row',
@@ -157,44 +193,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   teamTitle: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: theme.spacing.sm,
+    textAlign: 'center',
   },
-  playerName: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 2,
+  playersRow: {
+    flexDirection: 'row',
+    gap: -theme.spacing.xs, // Overlap avatars slightly
+    marginBottom: theme.spacing.xs,
+  },
+  playerNames: {
+    textAlign: 'center',
   },
   scoreContainer: {
-    paddingHorizontal: 20,
-  },
-  score: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    paddingHorizontal: theme.spacing.lg,
+    gap: theme.spacing.xs,
   },
-  fabText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
+  setsInfo: {
+    textAlign: 'center',
+    marginTop: theme.spacing.xs,
   },
 });
 

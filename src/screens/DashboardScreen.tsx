@@ -1,68 +1,272 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
+  Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { mockStats, mockMatches } from '../data/mockData';
+import { theme } from '../themes';
+import { 
+  Card, 
+  StatCard, 
+  Typography, 
+  Title, 
+  BodyText, 
+  Caption,
+  ProgressBar,
+  Avatar 
+} from '../components/ui';
+import { EloCalculator } from '../services/EloCalculator';
+
+const { width } = Dimensions.get('window');
 
 const DashboardScreen = () => {
   const recentMatches = mockMatches.slice(0, 3);
 
-  const StatCard = ({ title, value, subtitle }: { title: string; value: string | number; subtitle?: string }) => (
-    <View style={styles.statCard}>
-      <Text style={styles.statTitle}>{title}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      {subtitle && <Text style={styles.statSubtitle}>{subtitle}</Text>}
+  // Utilisation des vraies données Elo du système
+  const currentElo = mockStats.elo;
+  const eloHistory = mockStats.eloHistory;
+  const eloChange = eloHistory.length >= 2 
+    ? (eloHistory[eloHistory.length - 1] - eloHistory[eloHistory.length - 2]) 
+    : 0;
+
+  const HeroCard = () => (
+    <Card variant="gradient" gradient={theme.colors.gradients.primary} style={styles.heroCard}>
+      <View style={styles.heroContent}>
+        <View style={styles.heroLeft}>
+          <Avatar name="Marie Laurent" size="large" />
+          <View style={styles.heroText}>
+            <Typography variant="h4" color={theme.colors.text.inverse}>
+              Marie Laurent
+            </Typography>
+            <Caption color={theme.colors.text.inverse}>
+              Membre depuis 2024
+            </Caption>
+          </View>
+        </View>
+        <View style={styles.heroRight}>
+          <Typography variant="scoreLarge" color={theme.colors.text.inverse}>
+            {currentElo.toFixed(2)}
+          </Typography>
+          <Caption color={theme.colors.text.inverse}>
+            Elo Rating
+          </Caption>
+          <View style={styles.trendIndicator}>
+            <Icon 
+              name={eloChange >= 0 ? "trending-up" : "trending-down"} 
+              size={16} 
+              color={eloChange >= 0 ? theme.colors.success[300] : theme.colors.error[300]} 
+            />
+            <Caption color={eloChange >= 0 ? theme.colors.success[300] : theme.colors.error[300]}>
+              {EloCalculator.formatEloChange(eloChange)}
+            </Caption>
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+
+  const QuickStats = () => (
+    <View style={styles.quickStats}>
+      <StatCard
+        title="Classement"
+        value={`#${mockStats.ranking}`}
+        icon={<Icon name="trophy" size={24} color={theme.colors.warning[500]} />}
+        gradient={theme.colors.gradients.sunset}
+      />
+      <StatCard
+        title="Victoires"
+        value={mockStats.wins}
+        subtitle={`${mockStats.winRate}%`}
+        icon={<Icon name="checkmark-circle" size={24} color={theme.colors.success[500]} />}
+      />
+      <StatCard
+        title="Matchs"
+        value={mockStats.totalMatches}
+        subtitle="Cette saison"
+        icon={<Icon name="tennisball" size={24} color={theme.colors.primary[500]} />}
+      />
+      <StatCard
+        title="Série"
+        value={mockStats.currentStreak}
+        subtitle="Victoires"
+        icon={<Icon name="flame" size={24} color={theme.colors.error[500]} />}
+        gradient={theme.colors.gradients.forest}
+      />
     </View>
   );
 
-  return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>Bonjour !</Text>
-        <Text style={styles.subtitleText}>Voici vos statistiques</Text>
-      </View>
-
-      <View style={styles.statsGrid}>
-        <StatCard title="Classement" value={`#${mockStats.ranking}`} />
-        <StatCard title="Points" value={mockStats.points} />
-        <StatCard title="Matchs joués" value={mockStats.totalMatches} />
-        <StatCard title="Taux de victoire" value={`${mockStats.winRate}%`} />
-      </View>
-
-      <View style={styles.streakContainer}>
-        <View style={styles.streakCard}>
-          <Text style={styles.streakTitle}>Série actuelle</Text>
-          <Text style={styles.streakValue}>{mockStats.currentStreak} victoires</Text>
+  const EloHistoryChart = () => {
+    const maxElo = Math.max(...eloHistory);
+    const minElo = Math.min(...eloHistory);
+    const range = maxElo - minElo || 1;
+    
+    return (
+      <Card variant="elevated" style={styles.eloChartCard}>
+        <View style={styles.sectionHeader}>
+          <Typography variant="h4">Évolution Elo</Typography>
+          <Icon name="trending-up" size={20} color={theme.colors.primary[500]} />
         </View>
-        <View style={styles.streakCard}>
-          <Text style={styles.streakTitle}>Meilleure série</Text>
-          <Text style={styles.streakValue}>{mockStats.bestStreak} victoires</Text>
+        
+        <View style={styles.eloChart}>
+          <View style={styles.eloChartContent}>
+            {eloHistory.map((elo, index) => {
+              const height = Math.max(4, ((elo - minElo) / range) * 60 + 20);
+              const isLast = index === eloHistory.length - 1;
+              const isFirst = index === 0;
+              
+              return (
+                <View key={index} style={styles.eloPoint}>
+                  <View 
+                    style={[
+                      styles.eloBar, 
+                      { 
+                        height,
+                        backgroundColor: isLast 
+                          ? theme.colors.primary[500] 
+                          : theme.colors.primary[300] 
+                      }
+                    ]} 
+                  />
+                  {(isFirst || isLast) && (
+                    <Typography 
+                      variant="caption" 
+                      color={theme.colors.text.secondary}
+                      style={styles.eloValue}
+                    >
+                      {elo.toFixed(1)}
+                    </Typography>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+          
+          <View style={styles.eloChartLabels}>
+            <Caption color={theme.colors.text.secondary}>Il y a {eloHistory.length - 1} matchs</Caption>
+            <Caption color={theme.colors.text.secondary}>Aujourd'hui</Caption>
+          </View>
+        </View>
+      </Card>
+    );
+  };
+
+  const PerformanceSection = () => (
+    <Card variant="elevated" style={styles.performanceCard}>
+      <View style={styles.sectionHeader}>
+        <Typography variant="h4">Performance</Typography>
+        <Icon name="analytics" size={20} color={theme.colors.primary[500]} />
+      </View>
+      
+      <View style={styles.performanceContent}>
+        <View style={styles.performanceItem}>
+          <BodyText>Taux de victoire</BodyText>
+          <ProgressBar 
+            progress={mockStats.winRate} 
+            showLabel={true} 
+            height={8}
+            gradient={theme.colors.gradients.success}
+            style={{ marginTop: theme.spacing.sm }}
+          />
+        </View>
+        
+        <View style={styles.performanceItem}>
+          <BodyText>Progression Elo</BodyText>
+          <View style={styles.eloTrend}>
+            <Typography variant="scoreMedium" color={eloChange >= 0 ? theme.colors.success[500] : theme.colors.error[500]}>
+              {EloCalculator.formatEloChange(eloHistory[eloHistory.length - 1] - eloHistory[0])}
+            </Typography>
+            <Caption>Derniers matchs</Caption>
+          </View>
+        </View>
+
+        <View style={styles.performanceItem}>
+          <BodyText>Meilleure série</BodyText>
+          <Typography variant="scoreSmall" color={theme.colors.success[500]}>
+            {mockStats.bestStreak} victoires
+          </Typography>
         </View>
       </View>
+    </Card>
+  );
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Derniers matchs</Text>
-        {recentMatches.map((match) => (
-          <View key={match.id} style={styles.matchItem}>
-            <View style={styles.matchInfo}>
-              <Text style={styles.matchDate}>
-                {new Date(match.date).toLocaleDateString('fr-FR')} - {match.time}
-              </Text>
-              <Text style={styles.matchPlayers}>
-                {match.player1.name} & {match.player2.name} vs {match.player3.name} & {match.player4.name}
-              </Text>
+  const RecentMatchesSection = () => (
+    <Card variant="elevated" style={styles.matchesCard}>
+      <View style={styles.sectionHeader}>
+        <Typography variant="h4">Derniers matchs</Typography>
+        <Icon name="time" size={20} color={theme.colors.primary[500]} />
+      </View>
+
+      {recentMatches.map((match, index) => (
+        <View key={match.id} style={styles.matchItem}>
+          <View style={styles.matchLeft}>
+            <View style={[
+              styles.matchStatus,
+              { backgroundColor: getStatusColor(match.status) }
+            ]}>
+              <Icon 
+                name={getStatusIcon(match.status)} 
+                size={16} 
+                color={theme.colors.text.inverse} 
+              />
             </View>
-            <View style={styles.matchScore}>
-              <Text style={[styles.scoreText, match.status === 'completed' ? styles.completedScore : null]}>
-                {match.team1Score} - {match.team2Score}
-              </Text>
+            <View>
+              <BodyText>
+                {match.player3.name} & {match.player4.name}
+              </BodyText>
+              <Caption>
+                {new Date(match.date).toLocaleDateString('fr-FR')} • {match.time}
+              </Caption>
             </View>
           </View>
-        ))}
-      </View>
+          
+          <View style={styles.matchRight}>
+            <Typography variant="scoreSmall">
+              {match.team1Score} - {match.team2Score}
+            </Typography>
+            {match.status === 'completed' && (
+              <Caption color={match.team1Score > match.team2Score ? theme.colors.success[500] : theme.colors.error[500]}>
+                {match.team1Score > match.team2Score ? 'Victoire' : 'Défaite'}
+              </Caption>
+            )}
+          </View>
+        </View>
+      ))}
+    </Card>
+  );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return theme.colors.success[500];
+      case 'ongoing': return theme.colors.warning[500];
+      case 'scheduled': return theme.colors.primary[500];
+      default: return theme.colors.neutral[500];
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return 'checkmark';
+      case 'ongoing': return 'play';
+      case 'scheduled': return 'calendar';
+      default: return 'ellipse';
+    }
+  };
+
+  return (
+    <ScrollView 
+      style={styles.container} 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+    >
+      <HeroCard />
+      <QuickStats />
+      <EloHistoryChart />
+      <PerformanceSection />
+      <RecentMatchesSection />
     </ScrollView>
   );
 };
@@ -70,127 +274,122 @@ const DashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background.secondary,
   },
-  header: {
-    padding: 20,
-    backgroundColor: '#fff',
-    marginBottom: 16,
+  content: {
+    paddingHorizontal: theme.spacing.layout.screen.horizontal,
+    paddingBottom: theme.spacing.layout.section.large,
   },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+  heroCard: {
+    marginVertical: theme.spacing.md,
   },
-  subtitleText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
+  heroContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  statsGrid: {
+  heroLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  heroText: {
+    marginLeft: theme.spacing.md,
+    flex: 1,
+  },
+  heroRight: {
+    alignItems: 'flex-end',
+  },
+  trendIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.xs,
+    gap: theme.spacing.xs,
+  },
+  quickStats: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    gap: 12,
-    marginBottom: 16,
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
   },
-  statCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    width: '47%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  performanceCard: {
+    marginBottom: theme.spacing.md,
   },
-  statTitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  performanceContent: {
+    marginTop: theme.spacing.md,
+    gap: theme.spacing.lg,
   },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
+  performanceItem: {
+    gap: theme.spacing.xs,
   },
-  statSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+  eloTrend: {
+    alignItems: 'flex-start',
   },
-  streakContainer: {
+  matchesCard: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionHeader: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 12,
-    marginBottom: 16,
-  },
-  streakCard: {
-    backgroundColor: '#4CAF50',
-    padding: 16,
-    borderRadius: 12,
-    flex: 1,
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  streakTitle: {
-    fontSize: 14,
-    color: '#fff',
-    marginBottom: 8,
-  },
-  streakValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  section: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   matchItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: theme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.border.primary,
   },
-  matchInfo: {
-    flex: 1,
-  },
-  matchDate: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  matchPlayers: {
-    fontSize: 14,
-    color: '#333',
-  },
-  matchScore: {
+  matchLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    gap: theme.spacing.sm,
   },
-  scoreText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#666',
+  matchStatus: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  completedScore: {
-    color: '#007AFF',
+  matchRight: {
+    alignItems: 'flex-end',
+  },
+  eloChartCard: {
+    marginBottom: theme.spacing.md,
+  },
+  eloChart: {
+    marginTop: theme.spacing.md,
+  },
+  eloChartContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: 80,
+    paddingHorizontal: theme.spacing.xs,
+  },
+  eloPoint: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 1,
+  },
+  eloBar: {
+    width: 6,
+    borderRadius: 3,
+    marginBottom: theme.spacing.xs,
+  },
+  eloValue: {
+    fontSize: 10,
+    marginTop: theme.spacing.xs,
+  },
+  eloChartLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.xs,
   },
 });
 

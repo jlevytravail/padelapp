@@ -1,4 +1,5 @@
 import { Player, Match, Stats } from '../types';
+import { EloCalculator } from '../services/EloCalculator';
 
 export const mockPlayers: Player[] = [
   {
@@ -6,6 +7,7 @@ export const mockPlayers: Player[] = [
     name: 'Pierre Dubois',
     ranking: 1,
     points: 1250,
+    elo: 10.00, // Le meilleur joueur
     matchesPlayed: 45,
     matchesWon: 38,
   },
@@ -14,6 +16,7 @@ export const mockPlayers: Player[] = [
     name: 'Marie Laurent',
     ranking: 2,
     points: 1180,
+    elo: 7.52, // EloCalculator.pointsToElo(1180)
     matchesPlayed: 42,
     matchesWon: 34,
   },
@@ -22,6 +25,7 @@ export const mockPlayers: Player[] = [
     name: 'Antoine Martin',
     ranking: 3,
     points: 1120,
+    elo: 5.33, // EloCalculator.pointsToElo(1120)
     matchesPlayed: 40,
     matchesWon: 30,
   },
@@ -30,6 +34,7 @@ export const mockPlayers: Player[] = [
     name: 'Sophie Bernard',
     ranking: 4,
     points: 1080,
+    elo: 3.89, // EloCalculator.pointsToElo(1080)
     matchesPlayed: 38,
     matchesWon: 28,
   },
@@ -38,6 +43,7 @@ export const mockPlayers: Player[] = [
     name: 'Lucas Petit',
     ranking: 5,
     points: 1040,
+    elo: 2.44, // EloCalculator.pointsToElo(1040)
     matchesPlayed: 36,
     matchesWon: 26,
   },
@@ -46,6 +52,7 @@ export const mockPlayers: Player[] = [
     name: 'Emma Moreau',
     ranking: 6,
     points: 1000,
+    elo: 1.00, // EloCalculator.pointsToElo(1000)
     matchesPlayed: 35,
     matchesWon: 24,
   },
@@ -144,5 +151,7 @@ export const mockStats: Stats = {
   currentStreak: 5,
   bestStreak: 8,
   points: 1180,
+  elo: 7.52, // Elo actuel de Marie Laurent
+  eloHistory: EloCalculator.generateEloHistory(7.52, 10), // Historique des 10 derniers matchs
   ranking: 2,
 };

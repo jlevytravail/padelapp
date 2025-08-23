@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Player, NewMatch, Set } from '../types';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { Player, NewMatch, Set, MatchResult } from '../types';
 import { mockPlayers, addMatch } from '../data/mockData';
+import { theme } from '../themes';
+import { 
+  Card, 
+  Button, 
+  Typography 
+} from '../components/ui';
 import PlayerSelector from '../components/PlayerSelector';
 import SetScoreInput from '../components/SetScoreInput';
 import PositionSelector from '../components/PositionSelector';
+import { EloResultModal } from '../components/EloResultModal';
+import { EloCalculator } from '../services/EloCalculator';
 
 const AddMatchScreen = () => {
   const navigation = useNavigation();
@@ -31,6 +38,9 @@ const AddMatchScreen = () => {
     player3: null as 'left' | 'right' | null,
     player4: null as 'left' | 'right' | null,
   });
+
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
+  const [showEloModal, setShowEloModal] = useState(false);
 
   const addSet = () => {
     setNewMatch(prev => ({
@@ -91,10 +101,48 @@ const AddMatchScreen = () => {
     return true;
   };
 
-  const saveMatch = () => {
+  const previewMatch = () => {
     if (!validateMatch()) return;
 
     try {
+      const { player1, player2, player3, player4, sets } = newMatch;
+
+      // Création d'un match temporaire pour la preview
+      const tempMatch = {
+        id: 'temp',
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        player1: player1!,
+        player2: player2!,
+        player3: player3!,
+        player4: player4!,
+        team1Score: sets.reduce((acc, set) => acc + (set.team1 > set.team2 ? 1 : 0), 0),
+        team2Score: sets.reduce((acc, set) => acc + (set.team2 > set.team1 ? 1 : 0), 0),
+        sets,
+        status: 'completed' as const,
+        court: 'Court 1',
+      };
+
+      // Calcul du résultat avec les changements d'Elo
+      const result = EloCalculator.createMatchResult(
+        player1!, player2!, player3!, player4!, sets, tempMatch
+      );
+
+      setMatchResult(result);
+      setShowEloModal(true);
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors du calcul des changements d\'Elo');
+    }
+  };
+
+  const confirmMatch = () => {
+    if (!matchResult) return;
+
+    try {
+      // Application des changements d'Elo aux joueurs
+      EloCalculator.applyEloChanges(mockPlayers, matchResult.eloChanges);
+
+      // Ajout du match aux données
       const matchToSave = {
         player1: newMatch.player1,
         player2: newMatch.player2,
@@ -105,9 +153,12 @@ const AddMatchScreen = () => {
 
       addMatch(matchToSave);
 
+      setShowEloModal(false);
+      setMatchResult(null);
+
       Alert.alert(
         'Match enregistré',
-        'Le match a été ajouté avec succès !',
+        'Le match et les nouveaux classements Elo ont été sauvegardés !',
         [
           {
             text: 'OK',
@@ -120,124 +171,221 @@ const AddMatchScreen = () => {
     }
   };
 
+  const cancelMatch = () => {
+    setShowEloModal(false);
+    setMatchResult(null);
+  };
+
   const getSelectedPlayers = () => {
     return [newMatch.player1, newMatch.player2, newMatch.player3, newMatch.player4]
       .filter(Boolean)
       .map(p => p!.id);
   };
 
+  const canPreviewElo = () => {
+    const { player1, player2, player3, player4, sets } = newMatch;
+    return player1 && player2 && player3 && player4 && 
+           sets.some(set => set.team1 > 0 || set.team2 > 0);
+  };
+
+  const getEloPreview = () => {
+    if (!canPreviewElo()) return null;
+
+    const { player1, player2, player3, player4, sets } = newMatch;
+    const team1Elo = EloCalculator.getTeamElo(player1!, player2!);
+    const team2Elo = EloCalculator.getTeamElo(player3!, player4!);
+    
+    const team1Expected = EloCalculator.getExpectedScore(team1Elo, team2Elo);
+    const team2Expected = 1 - team1Expected;
+
+    return {
+      team1Elo: team1Elo.toFixed(2),
+      team2Elo: team2Elo.toFixed(2),
+      team1Expected: (team1Expected * 100).toFixed(0),
+      team2Expected: (team2Expected * 100).toFixed(0),
+    };
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header avec progression */}
+      <Card variant="elevated" style={styles.progressCard}>
+        <View style={styles.progressHeader}>
+          <Typography variant="h4">Nouveau Match</Typography>
+          <View style={styles.progressSteps}>
+            <View style={[styles.step, styles.stepActive]}>
+              <Typography variant="caption" color={theme.colors.text.inverse}>1</Typography>
+            </View>
+            <View style={styles.stepLine} />
+            <View style={[styles.step, newMatch.sets.some(s => s.team1 > 0 || s.team2 > 0) && styles.stepActive]}>
+              <Typography variant="caption" color={newMatch.sets.some(s => s.team1 > 0 || s.team2 > 0) ? theme.colors.text.inverse : theme.colors.text.secondary}>2</Typography>
+            </View>
+          </View>
+        </View>
+      </Card>
+
+      {/* Section Joueurs */}
+      <Card variant="elevated" style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Typography variant="h4">Joueurs</Typography>
+          <Icon name="people" size={20} color={theme.colors.primary[500]} />
+        </View>
         
-        {/* Section Joueurs */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Joueurs</Text>
-          
-          <View style={styles.teamsContainer}>
-            <View style={styles.team}>
-              <Text style={styles.teamTitle}>Équipe 1</Text>
-              
-              <View style={styles.playerContainer}>
-                <PlayerSelector
-                  selectedPlayer={newMatch.player1}
-                  onPlayerSelect={(player) => selectPlayer('player1', player)}
-                  availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
-                  placeholder="Joueur 1"
-                />
-                <PositionSelector
-                  selectedPosition={positions.player1}
-                  onPositionSelect={(position) => setPosition('player1', position)}
-                />
-              </View>
-
-              <View style={styles.playerContainer}>
-                <PlayerSelector
-                  selectedPlayer={newMatch.player2}
-                  onPlayerSelect={(player) => selectPlayer('player2', player)}
-                  availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
-                  placeholder="Joueur 2"
-                />
-                <PositionSelector
-                  selectedPosition={positions.player2}
-                  onPositionSelect={(position) => setPosition('player2', position)}
-                />
-              </View>
+        <View style={styles.teamsContainer}>
+          <View style={styles.team}>
+            <Typography variant="subtitle1" color={theme.colors.primary[500]} style={styles.teamTitle}>
+              Équipe 1
+            </Typography>
+            
+            <View style={styles.playerContainer}>
+              <PlayerSelector
+                selectedPlayer={newMatch.player1}
+                onPlayerSelect={(player) => selectPlayer('player1', player)}
+                availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
+                placeholder="Joueur 1"
+              />
+              <PositionSelector
+                selectedPosition={positions.player1}
+                onPositionSelect={(position) => setPosition('player1', position)}
+              />
             </View>
 
-            <Text style={styles.vs}>VS</Text>
+            <View style={styles.playerContainer}>
+              <PlayerSelector
+                selectedPlayer={newMatch.player2}
+                onPlayerSelect={(player) => selectPlayer('player2', player)}
+                availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
+                placeholder="Joueur 2"
+              />
+              <PositionSelector
+                selectedPosition={positions.player2}
+                onPositionSelect={(position) => setPosition('player2', position)}
+              />
+            </View>
+          </View>
 
-            <View style={styles.team}>
-              <Text style={styles.teamTitle}>Équipe 2</Text>
-              
-              <View style={styles.playerContainer}>
-                <PlayerSelector
-                  selectedPlayer={newMatch.player3}
-                  onPlayerSelect={(player) => selectPlayer('player3', player)}
-                  availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
-                  placeholder="Joueur 3"
-                />
-                <PositionSelector
-                  selectedPosition={positions.player3}
-                  onPositionSelect={(position) => setPosition('player3', position)}
-                />
-              </View>
+          <View style={styles.vsContainer}>
+            <View style={styles.vsCircle}>
+              <Typography variant="h4" color={theme.colors.text.inverse}>VS</Typography>
+            </View>
+          </View>
 
-              <View style={styles.playerContainer}>
-                <PlayerSelector
-                  selectedPlayer={newMatch.player4}
-                  onPlayerSelect={(player) => selectPlayer('player4', player)}
-                  availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
-                  placeholder="Joueur 4"
-                />
-                <PositionSelector
-                  selectedPosition={positions.player4}
-                  onPositionSelect={(position) => setPosition('player4', position)}
-                />
-              </View>
+          <View style={styles.team}>
+            <Typography variant="subtitle1" color={theme.colors.secondary[500]} style={styles.teamTitle}>
+              Équipe 2
+            </Typography>
+            
+            <View style={styles.playerContainer}>
+              <PlayerSelector
+                selectedPlayer={newMatch.player3}
+                onPlayerSelect={(player) => selectPlayer('player3', player)}
+                availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
+                placeholder="Joueur 3"
+              />
+              <PositionSelector
+                selectedPosition={positions.player3}
+                onPositionSelect={(position) => setPosition('player3', position)}
+              />
+            </View>
+
+            <View style={styles.playerContainer}>
+              <PlayerSelector
+                selectedPlayer={newMatch.player4}
+                onPlayerSelect={(player) => selectPlayer('player4', player)}
+                availablePlayers={mockPlayers.filter(p => !getSelectedPlayers().includes(p.id))}
+                placeholder="Joueur 4"
+              />
+              <PositionSelector
+                selectedPosition={positions.player4}
+                onPositionSelect={(position) => setPosition('player4', position)}
+              />
             </View>
           </View>
         </View>
+      </Card>
 
-        {/* Section Sets */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Scores par set</Text>
-            <TouchableOpacity style={styles.addButton} onPress={addSet}>
-              <Text style={styles.addButtonText}>+ Ajouter un set</Text>
-            </TouchableOpacity>
-          </View>
-
-          {newMatch.sets.map((set, index) => (
-            <SetScoreInput
-              key={index}
-              set={set}
-              setNumber={index + 1}
-              onSetChange={(updatedSet) => updateSet(index, updatedSet)}
-              onRemove={newMatch.sets.length > 1 ? () => removeSet(index) : undefined}
-            />
-          ))}
+      {/* Section Sets */}
+      <Card variant="elevated" style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Typography variant="h4">Scores par set</Typography>
+          <Button 
+            title="Ajouter" 
+            onPress={addSet}
+            size="small"
+            variant="outlined"
+            icon={<Icon name="add" size={16} color={theme.colors.primary[500]} />}
+          />
         </View>
 
+        {newMatch.sets.map((set, index) => (
+          <SetScoreInput
+            key={index}
+            set={set}
+            setNumber={index + 1}
+            onSetChange={(updatedSet) => updateSet(index, updatedSet)}
+            onRemove={newMatch.sets.length > 1 ? () => removeSet(index) : undefined}
+          />
+        ))}
 
-      </View>
+        {/* Preview Elo */}
+        {canPreviewElo() && (
+          <Card variant="outlined" style={styles.eloPreviewCard}>
+            <View style={styles.eloPreviewHeader}>
+              <Icon name="trending-up" size={20} color={theme.colors.warning[500]} />
+              <Typography variant="subtitle1" color={theme.colors.warning[500]}>
+                Probabilités de victoire
+              </Typography>
+            </View>
+            
+            {(() => {
+              const preview = getEloPreview();
+              return preview ? (
+                <View style={styles.eloPreviewContent}>
+                  <View style={styles.eloTeamPreview}>
+                    <Typography variant="caption" color={theme.colors.primary[500]}>Équipe 1 (Elo: {preview.team1Elo})</Typography>
+                    <Typography variant="scoreSmall" color={theme.colors.primary[500]}>{preview.team1Expected}%</Typography>
+                  </View>
+                  <View style={styles.eloTeamPreview}>
+                    <Typography variant="caption" color={theme.colors.secondary[500]}>Équipe 2 (Elo: {preview.team2Elo})</Typography>
+                    <Typography variant="scoreSmall" color={theme.colors.secondary[500]}>{preview.team2Expected}%</Typography>
+                  </View>
+                </View>
+              ) : null;
+            })()}
+          </Card>
+        )}
+      </Card>
 
       {/* Boutons d'action */}
       <View style={styles.actions}>
-        <TouchableOpacity 
-          style={styles.cancelButton} 
+        <Button 
+          title="Annuler"
           onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.cancelButtonText}>Annuler</Text>
-        </TouchableOpacity>
+          variant="outlined"
+          style={styles.actionButton}
+        />
         
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={saveMatch}
-        >
-          <Text style={styles.saveButtonText}>Enregistrer</Text>
-        </TouchableOpacity>
+        <Button 
+          title="Prévisualiser"
+          onPress={previewMatch}
+          variant="gradient"
+          gradient={theme.colors.gradients.primary}
+          style={styles.actionButton}
+          icon={<Icon name="eye" size={20} color={theme.colors.text.inverse} />}
+        />
       </View>
+
+      {/* Modal de prévisualisation Elo */}
+      <EloResultModal
+        visible={showEloModal}
+        matchResult={matchResult}
+        onClose={cancelMatch}
+        onConfirm={confirmMatch}
+      />
     </ScrollView>
   );
 };
@@ -245,33 +393,49 @@ const AddMatchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background.secondary,
   },
   content: {
-    padding: 16,
+    paddingHorizontal: theme.spacing.layout.screen.horizontal,
+    paddingBottom: theme.spacing.layout.section.large,
+  },
+  progressCard: {
+    marginVertical: theme.spacing.md,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressSteps: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  step: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.neutral[300],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepActive: {
+    backgroundColor: theme.colors.primary[500],
+  },
+  stepLine: {
+    width: 24,
+    height: 2,
+    backgroundColor: theme.colors.neutral[300],
+    marginHorizontal: theme.spacing.xs,
   },
   section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   teamsContainer: {
     flexDirection: 'row',
@@ -282,60 +446,52 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   teamTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
+    fontWeight: '600',
   },
   playerContainer: {
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
-  vs: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
-    paddingHorizontal: 16,
+  vsContainer: {
+    paddingHorizontal: theme.spacing.md,
+    alignItems: 'center',
   },
-  addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  vsCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.neutral[600],
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.shadows.ios.sm,
+    elevation: theme.shadows.android.sm,
   },
   actions: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.lg,
   },
-  cancelButton: {
+  actionButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 16,
-    borderRadius: 8,
+  },
+  eloPreviewCard: {
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.warning[50],
+  },
+  eloPreviewHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: theme.spacing.xs,
+    marginBottom: theme.spacing.sm,
   },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '600',
+  eloPreviewContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    borderRadius: 8,
+  eloTeamPreview: {
     alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
+    gap: theme.spacing.xs,
   },
 });
 
