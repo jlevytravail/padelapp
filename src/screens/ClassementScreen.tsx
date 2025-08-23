@@ -69,7 +69,6 @@ const ClassementScreen = () => {
             <View style={styles.winRateBadge}>
               <Text style={styles.winRateText}>{winRate}%</Text>
             </View>
-          </View>
         </View>
 
         <View style={styles.pointsContainer}>
