@@ -59,16 +59,17 @@ export const mockPlayers: Player[] = [
 ];
 
 export let mockMatches: Match[] = [
+  // Matchs récents (3 derniers jours)
   {
     id: '1',
     date: '2025-08-23',
     time: '18:30',
-    player1: mockPlayers[0],
-    player2: mockPlayers[1],
-    player3: mockPlayers[2],
-    player4: mockPlayers[3],
-    team1Score: 6,
-    team2Score: 3,
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[0], // Pierre
+    player3: mockPlayers[2], // Antoine 
+    player4: mockPlayers[3], // Sophie
+    team1Score: 2,
+    team2Score: 1,
     sets: [
       { team1: 6, team2: 4 },
       { team1: 3, team2: 6 },
@@ -81,33 +82,263 @@ export let mockMatches: Match[] = [
     id: '2',
     date: '2025-08-23',
     time: '20:00',
-    player1: mockPlayers[4],
-    player2: mockPlayers[5],
-    player3: mockPlayers[0],
-    player4: mockPlayers[2],
-    team1Score: 0,
-    team2Score: 0,
-    sets: [],
-    status: 'scheduled',
+    player1: mockPlayers[4], // Lucas
+    player2: mockPlayers[5], // Emma
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[2], // Antoine
+    team1Score: 1,
+    team2Score: 2,
+    sets: [
+      { team1: 4, team2: 6 },
+      { team1: 6, team2: 3 },
+      { team1: 5, team2: 7 }
+    ],
+    status: 'completed',
     court: 'Court 2',
   },
   {
     id: '3',
-    date: '2025-08-24',
+    date: '2025-08-22',
     time: '19:00',
-    player1: mockPlayers[1],
-    player2: mockPlayers[3],
-    player3: mockPlayers[4],
-    player4: mockPlayers[5],
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[3], // Sophie
+    player3: mockPlayers[4], // Lucas
+    player4: mockPlayers[5], // Emma
     team1Score: 2,
-    team2Score: 4,
+    team2Score: 0,
     sets: [
       { team1: 6, team2: 2 },
+      { team1: 6, team2: 4 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  // Semaine précédente
+  {
+    id: '4',
+    date: '2025-08-21',
+    time: '18:00',
+    player1: mockPlayers[0], // Pierre
+    player2: mockPlayers[2], // Antoine
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[4], // Lucas
+    team1Score: 2,
+    team2Score: 1,
+    sets: [
+      { team1: 6, team2: 4 },
       { team1: 4, team2: 6 },
-      { team1: 5, team2: 7 },
+      { team1: 6, team2: 3 }
+    ],
+    status: 'completed',
+    court: 'Court 2',
+  },
+  {
+    id: '5',
+    date: '2025-08-20',
+    time: '19:30',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[5], // Emma
+    player3: mockPlayers[0], // Pierre
+    player4: mockPlayers[3], // Sophie
+    team1Score: 0,
+    team2Score: 2,
+    sets: [
+      { team1: 3, team2: 6 },
+      { team1: 4, team2: 6 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  {
+    id: '6',
+    date: '2025-08-19',
+    time: '18:30',
+    player1: mockPlayers[2], // Antoine
+    player2: mockPlayers[4], // Lucas
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[5], // Emma
+    team1Score: 1,
+    team2Score: 2,
+    sets: [
+      { team1: 6, team2: 4 },
+      { team1: 2, team2: 6 },
+      { team1: 5, team2: 7 }
+    ],
+    status: 'completed',
+    court: 'Court 2',
+  },
+  {
+    id: '7',
+    date: '2025-08-18',
+    time: '17:00',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[0], // Pierre
+    player3: mockPlayers[3], // Sophie
+    player4: mockPlayers[4], // Lucas
+    team1Score: 2,
+    team2Score: 0,
+    sets: [
+      { team1: 6, team2: 3 },
+      { team1: 6, team2: 4 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  // Il y a 2 semaines
+  {
+    id: '8',
+    date: '2025-08-16',
+    time: '19:00',
+    player1: mockPlayers[3], // Sophie
+    player2: mockPlayers[5], // Emma
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[0], // Pierre
+    team1Score: 0,
+    team2Score: 2,
+    sets: [
+      { team1: 2, team2: 6 },
+      { team1: 4, team2: 6 }
+    ],
+    status: 'completed',
+    court: 'Court 2',
+  },
+  {
+    id: '9',
+    date: '2025-08-15',
+    time: '18:15',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[4], // Lucas
+    player3: mockPlayers[2], // Antoine
+    player4: mockPlayers[5], // Emma
+    team1Score: 2,
+    team2Score: 1,
+    sets: [
+      { team1: 4, team2: 6 },
+      { team1: 6, team2: 3 },
+      { team1: 6, team2: 4 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  {
+    id: '10',
+    date: '2025-08-14',
+    time: '20:00',
+    player1: mockPlayers[0], // Pierre
+    player2: mockPlayers[3], // Sophie
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[2], // Antoine
+    team1Score: 2,
+    team2Score: 0,
+    sets: [
+      { team1: 6, team2: 4 },
+      { team1: 6, team2: 2 }
+    ],
+    status: 'completed',
+    court: 'Court 2',
+  },
+  // Matchs plus anciens (3-4 semaines)
+  {
+    id: '11',
+    date: '2025-08-12',
+    time: '19:30',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[2], // Antoine
+    player3: mockPlayers[4], // Lucas
+    player4: mockPlayers[0], // Pierre
+    team1Score: 1,
+    team2Score: 2,
+    sets: [
+      { team1: 6, team2: 4 },
+      { team1: 3, team2: 6 },
+      { team1: 4, team2: 6 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  {
+    id: '12',
+    date: '2025-08-10',
+    time: '18:00',
+    player1: mockPlayers[5], // Emma
+    player2: mockPlayers[3], // Sophie
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[4], // Lucas
+    team1Score: 0,
+    team2Score: 2,
+    sets: [
+      { team1: 4, team2: 6 },
       { team1: 3, team2: 6 }
     ],
-    status: 'ongoing',
+    status: 'completed',
+    court: 'Court 2',
+  },
+  {
+    id: '13',
+    date: '2025-08-08',
+    time: '17:30',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[0], // Pierre
+    player3: mockPlayers[5], // Emma
+    player4: mockPlayers[2], // Antoine
+    team1Score: 2,
+    team2Score: 1,
+    sets: [
+      { team1: 3, team2: 6 },
+      { team1: 6, team2: 4 },
+      { team1: 6, team2: 2 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  {
+    id: '14',
+    date: '2025-08-06',
+    time: '19:00',
+    player1: mockPlayers[3], // Sophie
+    player2: mockPlayers[4], // Lucas
+    player3: mockPlayers[1], // Marie (nous)
+    player4: mockPlayers[5], // Emma
+    team1Score: 1,
+    team2Score: 2,
+    sets: [
+      { team1: 6, team2: 3 },
+      { team1: 4, team2: 6 },
+      { team1: 5, team2: 7 }
+    ],
+    status: 'completed',
+    court: 'Court 2',
+  },
+  {
+    id: '15',
+    date: '2025-08-04',
+    time: '18:45',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[3], // Sophie
+    player3: mockPlayers[0], // Pierre
+    player4: mockPlayers[4], // Lucas
+    team1Score: 0,
+    team2Score: 2,
+    sets: [
+      { team1: 4, team2: 6 },
+      { team1: 2, team2: 6 }
+    ],
+    status: 'completed',
+    court: 'Court 1',
+  },
+  // Match à venir (programmé)
+  {
+    id: '16',
+    date: '2025-08-24',
+    time: '19:00',
+    player1: mockPlayers[1], // Marie (nous)
+    player2: mockPlayers[2], // Antoine
+    player3: mockPlayers[0], // Pierre
+    player4: mockPlayers[5], // Emma
+    team1Score: 0,
+    team2Score: 0,
+    sets: [],
+    status: 'scheduled',
     court: 'Court 1',
   },
 ];
@@ -143,15 +374,44 @@ export const addMatch = (matchData: any) => {
   return newMatch;
 };
 
+// Calculer les vraies stats de Marie sur les matchs
+const getMarieStats = () => {
+  // Marie est toujours mockPlayers[1] dans nos matchs
+  const marieId = mockPlayers[1].id;
+  const completedMatches = mockMatches.filter(m => m.status === 'completed');
+  
+  let wins = 0;
+  let totalMatches = 0;
+  
+  completedMatches.forEach(match => {
+    // Vérifier si Marie joue dans ce match
+    const isTeam1 = match.player1.id === marieId || match.player2.id === marieId;
+    const isTeam2 = match.player3.id === marieId || match.player4.id === marieId;
+    
+    if (isTeam1 || isTeam2) {
+      totalMatches++;
+      // Victoire si l'équipe de Marie a gagné
+      if ((isTeam1 && match.team1Score > match.team2Score) ||
+          (isTeam2 && match.team2Score > match.team1Score)) {
+        wins++;
+      }
+    }
+  });
+  
+  return { totalMatches, wins, losses: totalMatches - wins, winRate: Math.round((wins / totalMatches) * 100) };
+};
+
+const marieRealStats = getMarieStats();
+
 export const mockStats: Stats = {
-  totalMatches: 32,
-  wins: 24,
-  losses: 8,
-  winRate: 75,
-  currentStreak: 5,
-  bestStreak: 8,
+  totalMatches: marieRealStats.totalMatches,
+  wins: marieRealStats.wins,
+  losses: marieRealStats.losses,
+  winRate: marieRealStats.winRate,
+  currentStreak: 3, // Série actuelle sur les derniers matchs
+  bestStreak: 4,    // Meilleure série de la saison
   points: 1180,
   elo: 7.52, // Elo actuel de Marie Laurent
-  eloHistory: EloCalculator.generateEloHistory(7.52, 10), // Historique des 10 derniers matchs
+  eloHistory: EloCalculator.generateEloHistory(7.52, 15), // Historique étendu à 15 matchs
   ranking: 2,
 };
