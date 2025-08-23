@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface PositionSelectorProps {
   selectedPosition: 'left' | 'right' | null;
@@ -17,7 +18,7 @@ const PositionSelector: React.FC<PositionSelectorProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Position (optionnel)</Text>
+      <Text style={styles.label}>Position sur le terrain</Text>
       <View style={styles.options}>
         <TouchableOpacity
           style={[
@@ -25,7 +26,13 @@ const PositionSelector: React.FC<PositionSelectorProps> = ({
             selectedPosition === 'left' && styles.optionSelected
           ]}
           onPress={() => onPositionSelect(selectedPosition === 'left' ? null : 'left')}
+          activeOpacity={0.7}
         >
+          <Ionicons 
+            name="arrow-back" 
+            size={16} 
+            color={selectedPosition === 'left' ? '#fff' : '#8E8E93'} 
+          />
           <Text style={[
             styles.optionText,
             selectedPosition === 'left' && styles.optionTextSelected
@@ -40,7 +47,13 @@ const PositionSelector: React.FC<PositionSelectorProps> = ({
             selectedPosition === 'right' && styles.optionSelected
           ]}
           onPress={() => onPositionSelect(selectedPosition === 'right' ? null : 'right')}
+          activeOpacity={0.7}
         >
+          <Ionicons 
+            name="arrow-forward" 
+            size={16} 
+            color={selectedPosition === 'right' ? '#fff' : '#8E8E93'} 
+          />
           <Text style={[
             styles.optionText,
             selectedPosition === 'right' && styles.optionTextSelected
@@ -55,35 +68,39 @@ const PositionSelector: React.FC<PositionSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
+    marginTop: 12,
   },
   label: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 6,
+    fontSize: 13,
+    color: '#8E8E93',
+    fontWeight: '600',
+    marginBottom: 8,
   },
   options: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   option: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    flexDirection: 'row',
+    backgroundColor: '#F2F2F7',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
   },
   optionSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#1A73E8',
+    borderColor: '#1A73E8',
   },
   optionText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '600',
   },
   optionTextSelected: {
     color: '#fff',

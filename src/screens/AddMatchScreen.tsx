@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Player, NewMatch, Set } from '../types';
 import { mockPlayers, addMatch } from '../data/mockData';
@@ -127,16 +128,23 @@ const AddMatchScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
         
         {/* Section Joueurs */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Joueurs</Text>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="people" size={24} color="#1A73E8" />
+            <Text style={styles.sectionTitle}>Sélection des joueurs</Text>
+          </View>
           
           <View style={styles.teamsContainer}>
             <View style={styles.team}>
-              <Text style={styles.teamTitle}>Équipe 1</Text>
+              <View style={styles.teamHeader}>
+                <View style={[styles.teamBadge, { backgroundColor: '#E3F2FD' }]}>
+                  <Text style={[styles.teamTitle, { color: '#1A73E8' }]}>Équipe 1</Text>
+                </View>
+              </View>
               
               <View style={styles.playerContainer}>
                 <PlayerSelector
@@ -165,10 +173,18 @@ const AddMatchScreen = () => {
               </View>
             </View>
 
-            <Text style={styles.vs}>VS</Text>
+            <View style={styles.vsContainer}>
+              <View style={styles.vsCircle}>
+                <Text style={styles.vs}>VS</Text>
+              </View>
+            </View>
 
             <View style={styles.team}>
-              <Text style={styles.teamTitle}>Équipe 2</Text>
+              <View style={styles.teamHeader}>
+                <View style={[styles.teamBadge, { backgroundColor: '#F3E5F5' }]}>
+                  <Text style={[styles.teamTitle, { color: '#7B1FA2' }]}>Équipe 2</Text>
+                </View>
+              </View>
               
               <View style={styles.playerContainer}>
                 <PlayerSelector
@@ -202,9 +218,13 @@ const AddMatchScreen = () => {
         {/* Section Sets */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Scores par set</Text>
-            <TouchableOpacity style={styles.addButton} onPress={addSet}>
-              <Text style={styles.addButtonText}>+ Ajouter un set</Text>
+            <View style={styles.sectionTitleContainer}>
+              <Ionicons name="trophy" size={24} color="#1A73E8" />
+              <Text style={styles.sectionTitle}>Scores par set</Text>
+            </View>
+            <TouchableOpacity style={styles.addButton} onPress={addSet} activeOpacity={0.7}>
+              <Ionicons name="add" size={16} color="#fff" />
+              <Text style={styles.addButtonText}>Ajouter</Text>
             </TouchableOpacity>
           </View>
 
@@ -227,14 +247,18 @@ const AddMatchScreen = () => {
         <TouchableOpacity 
           style={styles.cancelButton} 
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
+          <Ionicons name="close" size={20} color="#8E8E93" />
           <Text style={styles.cancelButtonText}>Annuler</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.saveButton} 
           onPress={saveMatch}
+          activeOpacity={0.8}
         >
+          <Ionicons name="checkmark" size={20} color="#fff" />
           <Text style={styles.saveButtonText}>Enregistrer</Text>
         </TouchableOpacity>
       </View>
@@ -245,97 +269,144 @@ const AddMatchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F2F7',
   },
   content: {
-    padding: 16,
+    padding: 20,
   },
   section: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 6,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1D1D1F',
   },
   teamsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 20,
   },
   team: {
     flex: 1,
   },
+  teamHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  teamBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
   teamTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
-    textAlign: 'center',
-    marginBottom: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   playerContainer: {
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  vsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vsCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F2F2F7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
   },
   vs: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
-    paddingHorizontal: 16,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#8E8E93',
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A73E8',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+    shadowColor: '#1A73E8',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
   actions: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    padding: 20,
+    gap: 16,
+    paddingBottom: 40,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    flexDirection: 'row',
+    backgroundColor: '#F2F2F7',
     paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
   },
   cancelButtonText: {
     fontSize: 16,
-    color: '#666',
+    color: '#8E8E93',
     fontWeight: '600',
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    backgroundColor: '#1A73E8',
     paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#1A73E8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   saveButtonText: {
     fontSize: 16,
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
 

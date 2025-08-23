@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Player } from '../types';
 
 interface PlayerSelectorProps {
@@ -33,13 +34,20 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({
     <TouchableOpacity
       style={styles.playerOption}
       onPress={() => handlePlayerSelect(item)}
+      activeOpacity={0.7}
     >
-      <View>
-        <Text style={styles.playerName}>{item.name}</Text>
-        <Text style={styles.playerInfo}>
-          Ranking: #{item.ranking} • {item.points} pts
+      <View style={styles.playerAvatar}>
+        <Text style={styles.playerInitials}>
+          {item.name.split(' ').map(n => n[0]).join('')}
         </Text>
       </View>
+      <View style={styles.playerDetails}>
+        <Text style={styles.playerName}>{item.name}</Text>
+        <Text style={styles.playerInfo}>
+          #{item.ranking} • {item.points} pts • {((item.matchesWon / item.matchesPlayed) * 100).toFixed(0)}% victoires
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
     </TouchableOpacity>
   );
 
@@ -48,14 +56,28 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({
       <TouchableOpacity
         style={styles.selector}
         onPress={() => setIsVisible(true)}
+        activeOpacity={0.7}
       >
-        <Text style={[
-          styles.selectorText,
-          !selectedPlayer && styles.placeholderText
-        ]}>
-          {selectedPlayer ? selectedPlayer.name : placeholder}
-        </Text>
-        <Text style={styles.arrow}>▼</Text>
+        <View style={styles.selectorContent}>
+          {selectedPlayer ? (
+            <View style={styles.selectedPlayerContainer}>
+              <View style={styles.selectedPlayerAvatar}>
+                <Text style={styles.selectedPlayerInitials}>
+                  {selectedPlayer.name.split(' ').map(n => n[0]).join('')}
+                </Text>
+              </View>
+              <View>
+                <Text style={styles.selectorText}>{selectedPlayer.name}</Text>
+                <Text style={styles.selectedPlayerInfo}>
+                  #{selectedPlayer.ranking} • {selectedPlayer.points} pts
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.placeholderText}>{placeholder}</Text>
+          )}
+        </View>
+        <Ionicons name="chevron-down" size={20} color="#C7C7CC" />
       </TouchableOpacity>
 
       <Modal
@@ -67,12 +89,13 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sélectionner un joueur</Text>
+              <Text style={styles.modalTitle}>Choisir un joueur</Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setIsVisible(false)}
+                activeOpacity={0.7}
               >
-                <Text style={styles.closeButtonText}>✕</Text>
+                <Ionicons name="close" size={20} color="#8E8E93" />
               </TouchableOpacity>
             </View>
 
@@ -91,82 +114,128 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({
 
 const styles = StyleSheet.create({
   selector: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
   },
-  selectorText: {
-    fontSize: 16,
-    color: '#333',
+  selectorContent: {
     flex: 1,
   },
-  placeholderText: {
-    color: '#999',
+  selectedPlayerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  arrow: {
+  selectedPlayerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1A73E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedPlayerInitials: {
     fontSize: 12,
-    color: '#666',
+    fontWeight: '700',
+    color: '#fff',
+  },
+  selectorText: {
+    fontSize: 17,
+    color: '#1D1D1F',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  selectedPlayerInfo: {
+    fontSize: 13,
+    color: '#8E8E93',
+    fontWeight: '500',
+  },
+  placeholderText: {
+    fontSize: 17,
+    color: '#C7C7CC',
+    fontWeight: '500',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
     width: '90%',
-    maxHeight: '70%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1D1D1F',
   },
   closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F2F2F7',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#666',
-  },
   playersList: {
-    maxHeight: 300,
+    maxHeight: 400,
   },
   playerOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#F2F2F7',
+    gap: 12,
+  },
+  playerAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1A73E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playerInitials: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  playerDetails: {
+    flex: 1,
   },
   playerName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1D1D1F',
+    marginBottom: 2,
   },
   playerInfo: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 15,
+    color: '#8E8E93',
+    fontWeight: '500',
   },
 });
 

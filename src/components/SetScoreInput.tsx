@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Set } from '../types';
 
 interface SetScoreInputProps {
@@ -38,36 +39,55 @@ const SetScoreInput: React.FC<SetScoreInputProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.setTitle}>Set {setNumber}</Text>
+        <View style={styles.setTitleContainer}>
+          <View style={styles.setNumberBadge}>
+            <Text style={styles.setNumber}>{setNumber}</Text>
+          </View>
+          <Text style={styles.setTitle}>Set {setNumber}</Text>
+        </View>
         {onRemove && (
-          <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
-            <Text style={styles.removeButtonText}>✕</Text>
+          <TouchableOpacity 
+            style={styles.removeButton} 
+            onPress={onRemove}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={16} color="#fff" />
           </TouchableOpacity>
         )}
       </View>
 
       <View style={styles.scoreContainer}>
         <View style={styles.teamScore}>
-          <Text style={styles.teamLabel}>Équipe 1</Text>
+          <View style={styles.teamLabelContainer}>
+            <View style={[styles.teamColorDot, { backgroundColor: '#1A73E8' }]} />
+            <Text style={styles.teamLabel}>Équipe 1</Text>
+          </View>
           <TextInput
             style={styles.scoreInput}
             value={set.team1.toString()}
             onChangeText={updateTeam1Score}
             keyboardType="numeric"
             placeholder="0"
+            placeholderTextColor="#C7C7CC"
           />
         </View>
 
-        <Text style={styles.separator}>-</Text>
+        <View style={styles.separatorContainer}>
+          <Text style={styles.separator}>-</Text>
+        </View>
 
         <View style={styles.teamScore}>
-          <Text style={styles.teamLabel}>Équipe 2</Text>
+          <View style={styles.teamLabelContainer}>
+            <View style={[styles.teamColorDot, { backgroundColor: '#7B1FA2' }]} />
+            <Text style={styles.teamLabel}>Équipe 2</Text>
+          </View>
           <TextInput
             style={styles.scoreInput}
             value={set.team2.toString()}
             onChangeText={updateTeam2Score}
             keyboardType="numeric"
             placeholder="0"
+            placeholderTextColor="#C7C7CC"
           />
         </View>
       </View>
@@ -75,16 +95,23 @@ const SetScoreInput: React.FC<SetScoreInputProps> = ({
       {/* Affichage du résultat du set */}
       {(set.team1 > 0 || set.team2 > 0) && (
         <View style={styles.resultContainer}>
-          <Text style={[
-            styles.resultText,
-            set.team1 > set.team2 ? styles.team1Winner : 
-            set.team2 > set.team1 ? styles.team2Winner : 
-            styles.tie
+          <View style={[
+            styles.resultBadge,
+            set.team1 > set.team2 ? styles.team1WinnerBadge : 
+            set.team2 > set.team1 ? styles.team2WinnerBadge : 
+            styles.tieBadge
           ]}>
-            {set.team1 > set.team2 ? 'Équipe 1 gagne' : 
-             set.team2 > set.team1 ? 'Équipe 2 gagne' : 
-             'Égalité'}
-          </Text>
+            <Ionicons 
+              name={set.team1 === set.team2 ? "remove" : "trophy"} 
+              size={14} 
+              color="#fff" 
+            />
+            <Text style={styles.resultText}>
+              {set.team1 > set.team2 ? 'Équipe 1' : 
+               set.team2 > set.team1 ? 'Équipe 2' : 
+               'Égalité'}
+            </Text>
+          </View>
         </View>
       )}
     </View>
@@ -93,92 +120,132 @@ const SetScoreInput: React.FC<SetScoreInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  setTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+  setTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  removeButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ff4757',
+  setNumberBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#1A73E8',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  removeButtonText: {
+  setNumber: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+  },
+  setTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1D1D1F',
+  },
+  removeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#FF3B30',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   scoreContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
+    gap: 24,
   },
   teamScore: {
-    alignItems: 'center',
     flex: 1,
+    alignItems: 'center',
+  },
+  teamLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  teamColorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   teamLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    fontWeight: '500',
+    fontSize: 15,
+    color: '#8E8E93',
+    fontWeight: '600',
   },
   scoreInput: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    fontSize: 18,
-    fontWeight: 'bold',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    fontSize: 24,
+    fontWeight: '800',
     textAlign: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    width: 60,
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
+    width: 80,
+    color: '#1D1D1F',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  separatorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   separator: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#8E8E93',
   },
   resultContainer: {
-    marginTop: 12,
+    marginTop: 16,
     alignItems: 'center',
   },
+  resultBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
+  },
   resultText: {
-    fontSize: 12,
-    fontWeight: '500',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
   },
-  team1Winner: {
-    backgroundColor: '#e3f2fd',
-    color: '#1976d2',
+  team1WinnerBadge: {
+    backgroundColor: '#1A73E8',
   },
-  team2Winner: {
-    backgroundColor: '#f3e5f5',
-    color: '#7b1fa2',
+  team2WinnerBadge: {
+    backgroundColor: '#7B1FA2',
   },
-  tie: {
-    backgroundColor: '#fff3e0',
-    color: '#f57c00',
+  tieBadge: {
+    backgroundColor: '#FF9500',
   },
 });
 

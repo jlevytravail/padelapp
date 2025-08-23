@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 import MatchsScreen from './src/screens/MatchsScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -19,9 +20,19 @@ const MatchsStack = () => (
       component={MatchsScreen}
       options={{ 
         title: 'Matchs',
-        headerStyle: { backgroundColor: '#007AFF' },
+        headerStyle: { 
+          backgroundColor: '#1A73E8',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 5,
+        },
         headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' }
+        headerTitleStyle: { 
+          fontWeight: '700',
+          fontSize: 18,
+        }
       }} 
     />
     <Stack.Screen 
@@ -29,9 +40,19 @@ const MatchsStack = () => (
       component={AddMatchScreen}
       options={{ 
         title: 'Nouveau Match',
-        headerStyle: { backgroundColor: '#007AFF' },
+        headerStyle: { 
+          backgroundColor: '#1A73E8',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 5,
+        },
         headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' }
+        headerTitleStyle: { 
+          fontWeight: '700',
+          fontSize: 18,
+        }
       }} 
     />
   </Stack.Navigator>
@@ -43,16 +64,36 @@ export default function App() {
       <StatusBar style="auto" />
       <Tab.Navigator
         screenOptions={{
-          tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '#666',
+          tabBarActiveTintColor: '#1A73E8',
+          tabBarInactiveTintColor: '#8E8E93',
           headerShown: false,
+          tabBarStyle: {
+            backgroundColor: '#FFFFFF',
+            borderTopWidth: 0,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 10,
+            height: 85,
+            paddingBottom: 8,
+            paddingTop: 8,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+            marginTop: 4,
+          },
         }}
       >
         <Tab.Screen 
           name="Matchs" 
           component={MatchsStack}
           options={{
-            tabBarLabel: 'Matchs'
+            tabBarLabel: 'Matchs',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="tennisball" size={size} color={color} />
+            ),
           }}
         />
         <Tab.Screen 
@@ -61,10 +102,23 @@ export default function App() {
           options={{
             title: 'Dashboard',
             tabBarLabel: 'Dashboard',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="stats-chart" size={size} color={color} />
+            ),
             headerShown: true,
-            headerStyle: { backgroundColor: '#007AFF' },
+            headerStyle: { 
+              backgroundColor: '#1A73E8',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 5,
+            },
             headerTintColor: '#fff',
-            headerTitleStyle: { fontWeight: 'bold' }
+            headerTitleStyle: { 
+              fontWeight: '700',
+              fontSize: 18,
+            }
           }}
         />
         <Tab.Screen 
@@ -73,10 +127,23 @@ export default function App() {
           options={{
             title: 'Classement Global',
             tabBarLabel: 'Classement',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="trophy" size={size} color={color} />
+            ),
             headerShown: true,
-            headerStyle: { backgroundColor: '#007AFF' },
+            headerStyle: { 
+              backgroundColor: '#1A73E8',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 5,
+            },
             headerTintColor: '#fff',
-            headerTitleStyle: { fontWeight: 'bold' }
+            headerTitleStyle: { 
+              fontWeight: '700',
+              fontSize: 18,
+            }
           }}
         />
       </Tab.Navigator>
