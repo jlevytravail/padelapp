@@ -66,7 +66,14 @@ src/
 
 ## 🎯 Prochaines étapes
 
-1. **Écran d'ajout de match** avec formulaire complet
+1. ✅ **Écran d'ajout de match** avec formulaire complet - TERMINÉ
 2. **Implémentation du système Elo** avec calculs automatiques
 3. **Enrichissement du dashboard** avec statistiques avancées
 4. **Finalisation du classement** avec données Elo réelles
+
+## 🔧 Bonnes pratiques de développement
+
+### Tests avec Expo
+- **TOUJOURS** tuer les serveurs de développement lancés avec `npx expo start` via KillBash
+- Ne pas laisser tourner de serveurs en arrière-plan après les tests
+- Utiliser `run_in_background: true` puis KillBash pour nettoyer

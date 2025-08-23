@@ -6,6 +6,12 @@ export interface Player {
   matchesPlayed: number;
   matchesWon: number;
   avatar?: string;
+  position?: 'left' | 'right';
+}
+
+export interface Set {
+  team1: number;
+  team2: number;
 }
 
 export interface Match {
@@ -18,8 +24,17 @@ export interface Match {
   player4: Player;
   team1Score: number;
   team2Score: number;
+  sets: Set[];
   status: 'scheduled' | 'ongoing' | 'completed';
   court: string;
+}
+
+export interface NewMatch {
+  player1: Player | null;
+  player2: Player | null;
+  player3: Player | null;
+  player4: Player | null;
+  sets: Set[];
 }
 
 export interface Stats {

@@ -51,7 +51,7 @@ export const mockPlayers: Player[] = [
   },
 ];
 
-export const mockMatches: Match[] = [
+export let mockMatches: Match[] = [
   {
     id: '1',
     date: '2025-08-23',
@@ -62,6 +62,11 @@ export const mockMatches: Match[] = [
     player4: mockPlayers[3],
     team1Score: 6,
     team2Score: 3,
+    sets: [
+      { team1: 6, team2: 4 },
+      { team1: 3, team2: 6 },
+      { team1: 7, team2: 5 }
+    ],
     status: 'completed',
     court: 'Court 1',
   },
@@ -75,6 +80,7 @@ export const mockMatches: Match[] = [
     player4: mockPlayers[2],
     team1Score: 0,
     team2Score: 0,
+    sets: [],
     status: 'scheduled',
     court: 'Court 2',
   },
@@ -88,10 +94,47 @@ export const mockMatches: Match[] = [
     player4: mockPlayers[5],
     team1Score: 2,
     team2Score: 4,
+    sets: [
+      { team1: 6, team2: 2 },
+      { team1: 4, team2: 6 },
+      { team1: 5, team2: 7 },
+      { team1: 3, team2: 6 }
+    ],
     status: 'ongoing',
     court: 'Court 1',
   },
 ];
+
+export const addMatch = (matchData: any) => {
+  const { player1, player2, player3, player4, sets } = matchData;
+  
+  // Calculer les scores des équipes
+  const team1Score = sets.reduce((acc: number, set: any) => {
+    return acc + (set.team1 > set.team2 ? 1 : 0);
+  }, 0);
+  
+  const team2Score = sets.reduce((acc: number, set: any) => {
+    return acc + (set.team2 > set.team1 ? 1 : 0);
+  }, 0);
+
+  const newMatch: Match = {
+    id: (mockMatches.length + 1).toString(),
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    player1,
+    player2,
+    player3,
+    player4,
+    team1Score,
+    team2Score,
+    sets,
+    status: 'completed',
+    court: 'Court 1',
+  };
+
+  mockMatches.unshift(newMatch);
+  return newMatch;
+};
 
 export const mockStats: Stats = {
   totalMatches: 32,
