@@ -4,3 +4,11 @@ export { Card, StatCard } from './Card';
 export { Button, FAB } from './Button';
 export { Avatar, Badge } from './Avatar';
 export { ProgressBar, CircularProgress } from './ProgressBar';
+export { 
+  ColorPicker, 
+  ColorPickerSelection, 
+  ColorPickerHue, 
+  ColorPickerPreview, 
+  ColorPickerFormat, 
+  useColorPicker 
+} from './ColorPicker';

@@ -1,51 +1,19 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// Import des écrans - étape 1: introduire le Dashboard shadcn simplifié
+// Import ONLY original screens without shadcn
 import MatchsScreen from './src/screens/MatchsScreen';
-import DashboardScreenShadcnSimple from './src/screens/DashboardScreenShadcn-simple';
+import DashboardScreen from './src/screens/DashboardScreen';
 import ClassementScreen from './src/screens/ClassementScreen';
-import AddMatchScreen from './src/screens/AddMatchScreen';
 import { theme } from './src/themes';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
-// Stack pour les matchs avec AddMatch
-const MatchsStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerStyle: { 
-        backgroundColor: theme.colors.primary[500],
-      },
-      headerTintColor: theme.colors.text.inverse,
-      headerTitleStyle: { fontWeight: '600', fontSize: 18 },
-      headerBackTitleVisible: false,
-    }}
-  >
-    <Stack.Screen 
-      name="MatchsList" 
-      component={MatchsScreen}
-      options={{ 
-        title: 'Mes Matchs',
-      }} 
-    />
-    <Stack.Screen 
-      name="AddMatch" 
-      component={AddMatchScreen}
-      options={{ 
-        title: 'Nouveau Match',
-      }} 
-    />
-  </Stack.Navigator>
-);
-
-// App complète avec écrans originaux et dépendances corrigées
-export default function App() {
+// Version étape 1: Navigation de base avec écrans originaux
+export default function AppStep1() {
   return (
     <NavigationContainer>
       <StatusBar style="light" backgroundColor={theme.colors.primary[500]} />
@@ -86,15 +54,15 @@ export default function App() {
       >
         <Tab.Screen 
           name="Matchs" 
-          component={MatchsStack}
+          component={MatchsScreen}
           options={{
-            tabBarLabel: 'Matchs',
-            headerShown: false, // Le Stack Navigator gère les headers
+            title: 'Mes Matchs',
+            tabBarLabel: 'Matchs'
           }}
         />
         <Tab.Screen 
           name="Dashboard" 
-          component={DashboardScreenShadcnSimple}
+          component={DashboardScreen}
           options={{
             title: 'Mon Dashboard',
             tabBarLabel: 'Dashboard',
@@ -112,5 +80,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-
